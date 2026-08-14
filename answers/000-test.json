@@ -1,16 +1,56 @@
 {
   "case": "000",
   "title": "Verifier Test",
-  "root_cause": [
-    "configuration mismatch"
+
+  "required_findings": [
+    {
+      "id": "configuration-mismatch",
+      "category": "root_cause",
+      "aliases": [
+        "config mismatch"
+      ]
+    },
+    {
+      "id": "test-environment-different",
+      "category": "detection",
+      "aliases": [
+        "test environment mismatch"
+      ]
+    }
   ],
-  "fault_change": [
-    "abc123"
-  ],
-  "detection": [
-    "test environment mismatch"
-  ],
-  "corrective_action": [
-    "restore previous configuration"
-  ]
+
+  "fault_change": {
+    "accepted": [
+      "abc123"
+    ]
+  },
+
+  "evidence": {
+    "minimum": 2,
+    "accepted": [
+      {
+        "id": "config.txt",
+        "aliases": [
+          "configuration file"
+        ],
+        "required": true
+      },
+      {
+        "id": "commit-abc123",
+        "aliases": [
+          "abc123",
+          "commit abc123"
+        ],
+        "required": true
+      }
+    ]
+  },
+
+  "corrective_action": {
+    "required_findings": [
+      "restore-previous-configuration"
+    ]
+  },
+
+  "require_explanation": true
 }

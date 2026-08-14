@@ -9,16 +9,18 @@ body:
     id: case
     attributes:
       label: Case
-      description: Enter the case identifier.
       placeholder: "001"
     validations:
       required: true
 
   - type: textarea
-    id: root_cause
+    id: findings
     attributes:
-      label: Root Cause
-      description: Explain what caused the incident.
+      label: Findings
+      description: List the findings you identified during the investigation.
+      placeholder: |
+        - finding-id
+        - another-finding-id
     validations:
       required: true
 
@@ -27,7 +29,6 @@ body:
     attributes:
       label: Fault-introducing Change
       description: Identify the change that introduced the incident.
-      placeholder: Commit hash, revision, configuration change, or event
     validations:
       required: true
 
@@ -35,29 +36,29 @@ body:
     id: evidence
     attributes:
       label: Supporting Evidence
-      description: List the evidence that supports your investigation.
+      description: List the recovered artifacts that support your findings.
       placeholder: |
-        - document
-        - log
+        - document-id
+        - log-id
         - commit
-        - source file
-        - other recovered artifact
     validations:
       required: true
 
   - type: textarea
-    id: detection
+    id: corrective_findings
     attributes:
-      label: Failure Detection
-      description: Explain why the incident was not detected earlier.
+      label: Corrective Findings
+      description: List the corrective actions required to restore the system.
+      placeholder: |
+        - corrective-action-id
     validations:
       required: true
 
   - type: textarea
-    id: corrective_action
+    id: explanation
     attributes:
-      label: Corrective Action
-      description: Explain what should be changed to restore correct operation.
+      label: Investigation Explanation
+      description: Explain how the evidence supports your reconstruction of the incident.
     validations:
       required: true
 
