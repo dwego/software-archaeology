@@ -1,0 +1,34 @@
+ASTRA RESEARCH DIRECTORATE
+GROUND SYSTEMS DIVISION
+
+MEMORANDUM: GSD-68-1021
+DATE: 21 OCTOBER 1968
+
+TO: ORPHEUS FLIGHT SOFTWARE GROUP
+FROM: GROUND SYSTEMS DIVISION
+
+SUBJECT: GDU-4 REPLACEMENT SCHEDULE
+
+The replacement Ground Decoder Unit will not be available before
+the current ORPHEUS-3 launch window.
+
+Flight software must therefore remain compatible with the existing
+GDU-4 decoder until further notice.
+
+ARD-COMM-12 Revision B remains the approved operational
+communication specification for ORPHEUS-3.
+
+Revision C material currently under evaluation may be used for
+simulation and laboratory testing only.
+
+Any flight implementation based on Revision C requires explicit
+Systems approval and corresponding updates to ground equipment.
+
+Do not deploy Revision C framing changes to ORPHEUS-3 flight
+hardware.
+
+-- M. Mercer
+Ground Systems Division
+
+P.S. If Flight Software changes the packet layout again before the
+new decoder arrives, they can explain it to Mission Operations.
