@@ -1,0 +1,62 @@
+ASTRA RESEARCH DIRECTORATE
+ORPHEUS COMMUNICATION SYSTEM
+
+DOCUMENT: ARD-COMM-12
+REVISION: B
+DATE: 14 AUGUST 1968
+STATUS: APPROVED FOR ORPHEUS-3
+
+1. TELEMETRY FRAME
+
+All telemetry frames transmitted by the ORPHEUS-3 onboard computer
+shall use the following format:
+
+OFFSET   SIZE   FIELD
+------   ----   ----------------
+0x00     1      SYNC
+0x01     1      TYPE
+0x02     1      LENGTH
+0x03     N      PAYLOAD
+0x03+N   1      CHECKSUM
+
+SYNC shall contain 0xA7.
+
+TYPE identifies the telemetry message class.
+
+LENGTH contains the number of payload bytes and does not include
+SYNC, TYPE, LENGTH, or CHECKSUM.
+
+CHECKSUM shall contain the unsigned 8-bit sum of TYPE, LENGTH,
+and all PAYLOAD bytes.
+
+2. BYTE ORDER
+
+All multi-byte integer fields transmitted as part of telemetry data
+shall use least-significant byte first ordering.
+
+3. RADIO FREQUENCY
+
+Flight software shall represent radio frequencies using unsigned
+integer values in kilohertz.
+
+Example:
+
+137.400 MHz = 137400 kHz
+
+The communications radio frequency register stores frequency using
+10 kHz units.
+
+Example:
+
+137400 kHz = register value 13740
+
+The radio driver is responsible for converting the flight software
+representation into the hardware register representation.
+
+4. GROUND COMPATIBILITY
+
+ORPHEUS-3 ground equipment currently implements ARD-COMM-12
+Revision B.
+
+Any modification to the telemetry frame layout requires a
+corresponding ground decoder update before deployment.
