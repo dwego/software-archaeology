@@ -1,0 +1,138 @@
+name: Verify Investigation
+
+on:
+  issues:
+    types:
+      - opened
+      - edited
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  verify:
+    if: contains(github.event.issue.labels.*.name, 'investigation')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build verifier
+        run: cargo build --release -p verifier
+
+      - name: Save issue body
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: |
+          printf '%s' "$ISSUE_BODY" > issue-body.txt
+
+      - name: Parse investigation
+        run: |
+          ./target/release/verifier parse-issue \
+            --input issue-body.txt \
+            --output submission.json
+
+      - name: Read case identifier
+        id: case
+        run: |
+          CASE_ID=$(jq -r '.case' submission.json)
+          echo "id=$CASE_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Find answer file
+        id: answer
+        env:
+          CASE_ID: ${{ steps.case.outputs.id }}
+        run: |
+          ANSWER_FILE=$(find answers -maxdepth 1 -type f -name "${CASE_ID}-*.json" | head -n 1)
+
+          if [ -z "$ANSWER_FILE" ]; then
+            echo "No answer file found for case $CASE_ID"
+            exit 1
+          fi
+
+          echo "file=$ANSWER_FILE" >> "$GITHUB_OUTPUT"
+
+      - name: Verify investigation
+        env:
+          ANSWER_FILE: ${{ steps.answer.outputs.file }}
+        run: |
+          ./target/release/verifier verify \
+            --answer "$ANSWER_FILE" \
+            --submission submission.json \
+            > result.json
+
+      - name: Build review comment
+        run: |
+          STATUS=$(jq -r '.status' result.json)
+          ROOT=$(jq -r '.checks.root_cause' result.json)
+          FAULT=$(jq -r '.checks.fault_change' result.json)
+          DETECTION=$(jq -r '.checks.detection' result.json)
+          ACTION=$(jq -r '.checks.corrective_action' result.json)
+          TITLE=$(jq -r '.title' result.json)
+
+          checkmark() {
+            if [ "$1" = "true" ]; then
+              printf "✅"
+            else
+              printf "❌"
+            fi
+          }
+
+          {
+            echo "## Investigation Report"
+            echo
+            echo "**$TITLE**"
+            echo
+            echo "$(checkmark "$ROOT") Root cause"
+            echo "$(checkmark "$FAULT") Fault-introducing change"
+            echo "$(checkmark "$DETECTION") Failure detection"
+            echo "$(checkmark "$ACTION") Corrective action"
+            echo
+            echo "### Status"
+            echo
+
+            if [ "$STATUS" = "solved" ]; then
+              echo "**SOLVED**"
+              echo
+              echo "Investigation accepted."
+            else
+              echo "**INCOMPLETE**"
+              echo
+              echo "Additional investigation is required."
+            fi
+          } > review.md
+
+      - name: Publish review
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh issue comment "$ISSUE_NUMBER" \
+            --repo "$GH_REPO" \
+            --body-file review.md
+
+      - name: Update labels
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          STATUS=$(jq -r '.status' result.json)
+
+          if [ "$STATUS" = "solved" ]; then
+            gh issue edit "$ISSUE_NUMBER" \
+              --repo "$GH_REPO" \
+              --add-label "solved" \
+              --remove-label "incomplete"
+          else
+            gh issue edit "$ISSUE_NUMBER" \
+              --repo "$GH_REPO" \
+              --add-label "incomplete" \
+              --remove-label "solved"
+          fi
