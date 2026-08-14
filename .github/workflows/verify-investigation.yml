@@ -5,7 +5,6 @@ on:
     types:
       - opened
       - edited
-      - labeled
 
 permissions:
   contents: read
@@ -33,6 +32,7 @@ jobs:
           printf '%s' "$ISSUE_BODY" > issue-body.txt
 
       - name: Parse investigation
+        id: parse
         run: |
           ./target/release/verifier parse-issue \
             --input issue-body.txt \
@@ -42,17 +42,27 @@ jobs:
         id: case
         run: |
           CASE_ID=$(jq -r '.case' submission.json)
+
+          if [ -z "$CASE_ID" ] || [ "$CASE_ID" = "null" ]; then
+            echo "Invalid case identifier"
+            exit 1
+          fi
+
           echo "id=$CASE_ID" >> "$GITHUB_OUTPUT"
 
-      - name: Find answer file
+      - name: Find case answer
         id: answer
         env:
           CASE_ID: ${{ steps.case.outputs.id }}
         run: |
-          ANSWER_FILE=$(find answers -maxdepth 1 -type f -name "${CASE_ID}-*.json" | head -n 1)
+          ANSWER_FILE=$(find answers \
+            -maxdepth 1 \
+            -type f \
+            -name "${CASE_ID}-*.json" \
+            | head -n 1)
 
           if [ -z "$ANSWER_FILE" ]; then
-            echo "No answer file found for case $CASE_ID"
+            echo "No answer definition found for case $CASE_ID"
             exit 1
           fi
 
@@ -67,14 +77,16 @@ jobs:
             --submission submission.json \
             > result.json
 
-      - name: Build review comment
+      - name: Build investigation report
         run: |
           STATUS=$(jq -r '.status' result.json)
-          ROOT=$(jq -r '.checks.root_cause' result.json)
-          FAULT=$(jq -r '.checks.fault_change' result.json)
-          DETECTION=$(jq -r '.checks.detection' result.json)
-          ACTION=$(jq -r '.checks.corrective_action' result.json)
           TITLE=$(jq -r '.title' result.json)
+
+          FINDINGS=$(jq -r '.checks.findings.passed' result.json)
+          FAULT=$(jq -r '.checks.fault_change.passed' result.json)
+          EVIDENCE=$(jq -r '.checks.evidence.passed' result.json)
+          CORRECTIVE=$(jq -r '.checks.corrective_action.passed' result.json)
+          EXPLANATION=$(jq -r '.checks.explanation.passed' result.json)
 
           checkmark() {
             if [ "$1" = "true" ]; then
@@ -89,10 +101,11 @@ jobs:
             echo
             echo "**$TITLE**"
             echo
-            echo "$(checkmark "$ROOT") Root cause"
+            echo "$(checkmark "$FINDINGS") Findings"
             echo "$(checkmark "$FAULT") Fault-introducing change"
-            echo "$(checkmark "$DETECTION") Failure detection"
-            echo "$(checkmark "$ACTION") Corrective action"
+            echo "$(checkmark "$EVIDENCE") Supporting evidence"
+            echo "$(checkmark "$CORRECTIVE") Corrective action"
+            echo "$(checkmark "$EXPLANATION") Investigation explanation"
             echo
             echo "### Status"
             echo
@@ -108,7 +121,7 @@ jobs:
             fi
           } > review.md
 
-      - name: Publish review
+      - name: Publish investigation report
         env:
           GH_TOKEN: ${{ github.token }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
@@ -118,7 +131,7 @@ jobs:
             --repo "$GH_REPO" \
             --body-file review.md
 
-      - name: Update labels
+      - name: Update investigation labels
         env:
           GH_TOKEN: ${{ github.token }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
@@ -130,10 +143,12 @@ jobs:
             gh issue edit "$ISSUE_NUMBER" \
               --repo "$GH_REPO" \
               --add-label "solved" \
-              --remove-label "incomplete"
+              --remove-label "incomplete" \
+              --remove-label "invalid-submission"
           else
             gh issue edit "$ISSUE_NUMBER" \
               --repo "$GH_REPO" \
               --add-label "incomplete" \
-              --remove-label "solved"
+              --remove-label "solved" \
+              --remove-label "invalid-submission"
           fi
