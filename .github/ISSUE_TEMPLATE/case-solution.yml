@@ -1,0 +1,70 @@
+name: Submit Investigation
+description: Submit your investigation for a Software Archaeology case
+title: "[INVESTIGATION] "
+labels:
+  - investigation
+
+body:
+  - type: input
+    id: case
+    attributes:
+      label: Case
+      description: Enter the case identifier.
+      placeholder: "001"
+    validations:
+      required: true
+
+  - type: textarea
+    id: root_cause
+    attributes:
+      label: Root Cause
+      description: Explain what caused the incident.
+    validations:
+      required: true
+
+  - type: input
+    id: fault_change
+    attributes:
+      label: Fault-introducing Change
+      description: Identify the change that introduced the incident.
+      placeholder: Commit hash, revision, configuration change, or event
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Supporting Evidence
+      description: List the evidence that supports your investigation.
+      placeholder: |
+        - document
+        - log
+        - commit
+        - source file
+        - other recovered artifact
+    validations:
+      required: true
+
+  - type: textarea
+    id: detection
+    attributes:
+      label: Failure Detection
+      description: Explain why the incident was not detected earlier.
+    validations:
+      required: true
+
+  - type: textarea
+    id: corrective_action
+    attributes:
+      label: Corrective Action
+      description: Explain what should be changed to restore correct operation.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: declaration
+    attributes:
+      label: Investigation Declaration
+      options:
+        - label: I based this investigation on evidence recovered from the case.
+          required: true
