@@ -1,16 +1,36 @@
-use clap::Parser;
+mod issue_parser;
+
+use clap::{Parser, Subcommand};
 use serde::{Deserialize, Serialize};
 use std::{fs, path::PathBuf, process};
 
+use issue_parser::parse_issue_body;
+
 #[derive(Parser)]
 #[command(name = "verifier")]
-#[command(about = "Verify Software Archaeology investigation reports")]
+#[command(about = "Software Archaeology investigation verifier")]
 struct Cli {
-    #[arg(long)]
-    answer: PathBuf,
+    #[command(subcommand)]
+    command: Commands,
+}
 
-    #[arg(long)]
-    submission: PathBuf,
+#[derive(Subcommand)]
+enum Commands {
+    Verify {
+        #[arg(long)]
+        answer: PathBuf,
+
+        #[arg(long)]
+        submission: PathBuf,
+    },
+
+    ParseIssue {
+        #[arg(long)]
+        input: PathBuf,
+
+        #[arg(long)]
+        output: PathBuf,
+    },
 }
 
 #[derive(Debug, Deserialize)]
@@ -71,31 +91,15 @@ where
         .map_err(|err| format!("failed to parse {}: {err}", path.display()))
 }
 
-fn main() {
-    let cli = Cli::parse();
-
-    let answer: CaseAnswer = match read_json(&cli.answer) {
-        Ok(value) => value,
-        Err(err) => {
-            eprintln!("{err}");
-            process::exit(1);
-        }
-    };
-
-    let submission: Submission = match read_json(&cli.submission) {
-        Ok(value) => value,
-        Err(err) => {
-            eprintln!("{err}");
-            process::exit(1);
-        }
-    };
+fn verify(answer_path: PathBuf, submission_path: PathBuf) -> Result<(), String> {
+    let answer: CaseAnswer = read_json(&answer_path)?;
+    let submission: Submission = read_json(&submission_path)?;
 
     if answer.case != submission.case {
-        eprintln!(
+        return Err(format!(
             "case mismatch: expected {}, received {}",
             answer.case, submission.case
-        );
-        process::exit(1);
+        ));
     }
 
     let checks = Checks {
@@ -124,11 +128,43 @@ fn main() {
         checks,
     };
 
-    match serde_json::to_string_pretty(&result) {
-        Ok(json) => println!("{json}"),
-        Err(err) => {
-            eprintln!("failed to serialize verification result: {err}");
-            process::exit(1);
-        }
+    let json = serde_json::to_string_pretty(&result)
+        .map_err(|err| format!("failed to serialize result: {err}"))?;
+
+    println!("{json}");
+
+    Ok(())
+}
+
+fn parse_issue(input: PathBuf, output: PathBuf) -> Result<(), String> {
+    let body = fs::read_to_string(&input)
+        .map_err(|err| format!("failed to read {}: {err}", input.display()))?;
+
+    let submission = parse_issue_body(&body)?;
+
+    let json = serde_json::to_string_pretty(&submission)
+        .map_err(|err| format!("failed to serialize submission: {err}"))?;
+
+    fs::write(&output, json)
+        .map_err(|err| format!("failed to write {}: {err}", output.display()))?;
+
+    Ok(())
+}
+
+fn main() {
+    let cli = Cli::parse();
+
+    let result = match cli.command {
+        Commands::Verify {
+            answer,
+            submission,
+        } => verify(answer, submission),
+
+        Commands::ParseIssue { input, output } => parse_issue(input, output),
+    };
+
+    if let Err(err) = result {
+        eprintln!("{err}");
+        process::exit(1);
     }
 }
