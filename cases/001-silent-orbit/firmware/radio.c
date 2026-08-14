@@ -3,6 +3,11 @@
 static uint32_t current_frequency_khz;
 static uint16_t frequency_register;
 
+static uint16_t frequency_to_register(uint32_t frequency_khz)
+{
+    return (uint16_t)(frequency_khz / 10U);
+}
+
 void radio_set_frequency(uint32_t frequency_khz)
 {
     current_frequency_khz = frequency_khz;
@@ -13,7 +18,7 @@ void radio_set_frequency(uint32_t frequency_khz)
      *
      * RHC — 1968-08-19
      */
-    frequency_register = (uint16_t)(frequency_khz / 10);
+    frequency_register = frequency_to_register(frequency_khz);
 }
 
 uint32_t radio_get_frequency(void)
