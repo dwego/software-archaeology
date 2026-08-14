@@ -1,0 +1,36 @@
+ASTRA RESEARCH DIRECTORATE
+COMMUNICATION HARDWARE GROUP
+
+ENGINEERING NOTE: CHG-68-0820
+DATE: 20 AUGUST 1968
+
+SUBJECT: ORPHEUS RADIO FREQUENCY REGISTER INTERFACE
+
+The ORPHEUS communication radio does not store carrier frequency
+directly in hertz or kilohertz.
+
+The frequency control register uses units of 10 kHz.
+
+Examples:
+
+137400 kHz -> 13740 -> 0x35AC
+137850 kHz -> 13785 -> 0x35D9
+136950 kHz -> 13695 -> 0x357F
+
+Flight software may continue to represent frequencies in kilohertz.
+
+The radio driver is responsible for translating the flight-software
+representation into the value expected by the hardware register.
+
+This conversion should remain isolated inside the driver so higher
+level software does not depend on radio hardware representation.
+
+-- R. H. Clarke
+Communication Hardware Group
+
+NOTE:
+
+Yes, the register format is strange.
+
+No, changing the hardware is not currently considered an acceptable
+software fix.
