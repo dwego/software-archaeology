@@ -1,0 +1,16 @@
+{
+  "case": "000",
+  "title": "Verifier Test",
+  "root_cause": [
+    "configuration mismatch"
+  ],
+  "fault_change": [
+    "abc123"
+  ],
+  "detection": [
+    "test environment mismatch"
+  ],
+  "corrective_action": [
+    "restore previous configuration"
+  ]
+}
