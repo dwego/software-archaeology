@@ -1,7 +1,0 @@
-{
-  "case": "000",
-  "root_cause": "configuration mismatch",
-  "fault_change": "abc123",
-  "detection": "wrong answer",
-  "corrective_action": "restore previous configuration"
-}
