@@ -4,11 +4,16 @@ size_t serialize_packet(
     const telemetry_packet_t *packet,
     uint8_t *output
 ) {
+    if (packet->length > ORPHEUS_MAX_PAYLOAD) {
+        return 0;
+    }
+
     size_t index = 0;
     uint8_t checksum = 0;
 
-    /* Keep GDU compatibility in mind when touching this layout. */
     output[index++] = ORPHEUS_SYNC_BYTE;
+
+    /* Keep GDU compatibility in mind when touching this layout. */
     output[index++] = packet->type;
     output[index++] = packet->length;
 
