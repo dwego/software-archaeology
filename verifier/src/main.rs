@@ -225,13 +225,15 @@ fn evaluate_findings(
 
         let mut candidates = vec![rule.id.clone()];
         candidates.extend(rule.aliases.clone());
-
+        
         let found = submitted_normalized.iter().any(|submitted_value| {
-            candidates
-                .iter()
-                .any(|candidate| {
-                    submitted_value == &normalize(candidate)
-                })
+            candidates.iter().any(|candidate| {
+                let candidate = normalize(candidate);
+
+                submitted_value == &candidate
+                    || submitted_value.contains(&candidate)
+                    || candidate.contains(submitted_value)
+            })
         });
 
         if found {
