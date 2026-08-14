@@ -1,0 +1,67 @@
+ASTRA RESEARCH DIRECTORATE
+ORPHEUS COMMUNICATION SYSTEM
+
+DOCUMENT: ARD-COMM-12
+REVISION: C
+DATE: 02 NOVEMBER 1968
+STATUS: ENGINEERING DRAFT
+
+1. TELEMETRY FRAME
+
+The following frame layout is proposed for the next communication
+system revision:
+
+OFFSET   SIZE   FIELD
+------   ----   ----------------
+0x00     1      SYNC
+0x01     1      LENGTH
+0x02     1      TYPE
+0x03     N      PAYLOAD
+0x03+N   1      CHECKSUM
+
+SYNC shall contain 0xA7.
+
+LENGTH contains the number of payload bytes.
+
+TYPE identifies the telemetry message class.
+
+CHECKSUM shall contain the unsigned 8-bit sum of TYPE, LENGTH,
+and all PAYLOAD bytes.
+
+2. RADIO CONFIGURATION
+
+Higher-level flight software may provide radio frequencies using
+megahertz notation.
+
+Example:
+
+137.400 MHz
+
+The radio driver remains responsible for converting the requested
+frequency into the representation required by the communication
+hardware.
+
+3. GROUND SYSTEM COMPATIBILITY
+
+Revision C framing requires the replacement Ground Decoder Unit.
+
+Existing GDU-4 equipment does not implement the proposed field
+ordering defined by this revision.
+
+4. IMPLEMENTATION STATUS
+
+Revision C is currently approved for simulator and laboratory
+evaluation only.
+
+Flight deployment requires:
+
+- Ground Systems approval
+- GDU replacement
+- regression testing against operational equipment
+
+DO NOT DEPLOY REVISION C TO ORPHEUS-3 FLIGHT HARDWARE.
+
+-- Systems Engineering
+
+NOTE:
+Someone please stop calling every draft "the latest specification."

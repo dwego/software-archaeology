@@ -1,0 +1,151 @@
+{
+  "case": "001",
+  "title": "Silent Orbit",
+
+  "required_findings": [
+    {
+      "id": "revision-c-was-not-approved-for-flight",
+      "category": "specification",
+      "aliases": [
+        "revision c was not approved",
+        "rev c was not approved for flight",
+        "revision c was an engineering draft"
+      ]
+    },
+    {
+      "id": "orpheus-3-should-use-revision-b",
+      "category": "specification",
+      "aliases": [
+        "orpheus-3 should use revision b",
+        "revision b was the operational specification",
+        "gdu-4 required revision b"
+      ]
+    },
+    {
+      "id": "telemetry-field-order-mismatch",
+      "category": "telemetry",
+      "aliases": [
+        "type and length were swapped",
+        "telemetry field order mismatch",
+        "revision c changed the telemetry field order"
+      ]
+    },
+    {
+      "id": "radio-register-unit-conversion-missing",
+      "category": "radio",
+      "aliases": [
+        "radio frequency conversion was missing",
+        "10 khz conversion was removed",
+        "radio register received the wrong units",
+        "frequency register unit conversion was missing"
+      ]
+    },
+    {
+      "id": "internal-loopback-used-the-same-protocol-revision",
+      "category": "detection",
+      "aliases": [
+        "internal loopback used the same revision",
+        "encoder and diagnostic decoder used the same protocol",
+        "loopback did not include gdu-4"
+      ]
+    }
+  ],
+
+  "fault_change": {
+    "accepted": [
+      "54d54dc"
+    ]
+  },
+
+  "evidence": {
+    "minimum": 5,
+    "accepted": [
+      {
+        "id": "ARD-COMM-12-REV-B",
+        "aliases": [
+          "comm-spec-rev-b.txt",
+          "ARD-COMM-12 Revision B",
+          "revision b specification"
+        ],
+        "required": true
+      },
+      {
+        "id": "ARD-COMM-12-REV-C",
+        "aliases": [
+          "comm-spec-rev-c.txt",
+          "ARD-COMM-12 Revision C",
+          "revision c specification"
+        ],
+        "required": true
+      },
+      {
+        "id": "GSD-68-1021",
+        "aliases": [
+          "1968-10-21-ground-equipment.txt",
+          "GDU-4 compatibility memo",
+          "ground equipment memo"
+        ],
+        "required": true
+      },
+      {
+        "id": "CHG-68-0820",
+        "aliases": [
+          "radio-interface-note.txt",
+          "radio hardware interface note",
+          "radio frequency register interface"
+        ],
+        "required": true
+      },
+      {
+        "id": "FSW-68-1105",
+        "aliases": [
+          "internal-loopback-note.txt",
+          "internal telemetry loopback note",
+          "loopback engineering note"
+        ],
+        "required": true
+      },
+      {
+        "id": "GROUND-TEST-041",
+        "aliases": [
+          "ground-test-041.log",
+          "ground test 041"
+        ],
+        "required": false
+      },
+      {
+        "id": "GROUND-TEST-042",
+        "aliases": [
+          "ground-test-042.log",
+          "ground test 042"
+        ],
+        "required": true
+      },
+      {
+        "id": "FTO-68-1117",
+        "aliases": [
+          "1968-11-17-comm-failure.txt",
+          "communication failure memo",
+          "ground test 042 failure memo"
+        ],
+        "required": false
+      },
+      {
+        "id": "54d54dc",
+        "aliases": [
+          "commit 54d54dc"
+        ],
+        "required": true
+      }
+    ]
+  },
+
+  "corrective_action": {
+    "required_findings": [
+      "restore-revision-b-telemetry-layout",
+      "restore-radio-10khz-register-conversion"
+    ]
+  },
+
+  "require_explanation": true
+}
