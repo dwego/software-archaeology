@@ -1,0 +1,38 @@
+ASTRA RESEARCH DIRECTORATE
+FLIGHT TEST OPERATIONS
+
+MEMORANDUM: FTO-68-1117
+DATE: 17 NOVEMBER 1968
+
+TO: ORPHEUS-3 SYSTEMS TEAM
+FROM: FLIGHT TEST OPERATIONS
+
+SUBJECT: COMMUNICATION FAILURE DURING GROUND TEST 042
+
+Ground Test 042 was terminated following simultaneous telemetry
+decoding failures and loss of radio channel acquisition.
+
+The previous communication test completed without reported faults.
+
+No hardware modifications were recorded between Ground Test 041
+and Ground Test 042.
+
+Flight Software reports that internal telemetry loopback testing
+continues to pass.
+
+Ground Systems continues to reject frames produced by the flight
+computer.
+
+The primary and backup radio channels also failed to acquire stable
+ground lock.
+
+Communication firmware build 68.11.14 was installed between the
+two test sessions.
+
+Further flight-software changes are suspended pending investigation.
+
+-- E. Hollis
+Flight Test Operations
+
+P.S. Mission Operations would appreciate not discovering new
+protocols fifteen minutes into a night test.
