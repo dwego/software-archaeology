@@ -32,7 +32,6 @@ jobs:
           printf '%s' "$ISSUE_BODY" > issue-body.txt
 
       - name: Parse investigation
-        id: parse
         run: |
           ./target/release/verifier parse-issue \
             --input issue-body.txt \
@@ -82,11 +81,26 @@ jobs:
           STATUS=$(jq -r '.status' result.json)
           TITLE=$(jq -r '.title' result.json)
 
-          FINDINGS=$(jq -r '.checks.findings.passed' result.json)
           FAULT=$(jq -r '.checks.fault_change.passed' result.json)
           EVIDENCE=$(jq -r '.checks.evidence.passed' result.json)
           CORRECTIVE=$(jq -r '.checks.corrective_action.passed' result.json)
           EXPLANATION=$(jq -r '.checks.explanation.passed' result.json)
+
+          category_status() {
+            CATEGORY="$1"
+
+            VALUE=$(jq -r \
+              --arg category "$CATEGORY" \
+              '
+                [
+                  .checks.findings.categories[]
+                  | select(.category == $category)
+                  | .passed
+                ][0] // "missing"
+              ' result.json)
+
+            printf '%s' "$VALUE"
+          }
 
           checkmark() {
             if [ "$1" = "true" ]; then
@@ -96,12 +110,25 @@ jobs:
             fi
           }
 
+          SPECIFICATION=$(category_status "specification")
+          TELEMETRY=$(category_status "telemetry")
+          RADIO=$(category_status "radio")
+          DETECTION=$(category_status "detection")
+
           {
             echo "## Investigation Report"
             echo
             echo "**$TITLE**"
             echo
-            echo "$(checkmark "$FINDINGS") Findings"
+            echo "### Findings"
+            echo
+            echo "$(checkmark "$SPECIFICATION") Specification"
+            echo "$(checkmark "$TELEMETRY") Telemetry"
+            echo "$(checkmark "$RADIO") Radio"
+            echo "$(checkmark "$DETECTION") Failure detection"
+            echo
+            echo "### Verification"
+            echo
             echo "$(checkmark "$FAULT") Fault-introducing change"
             echo "$(checkmark "$EVIDENCE") Supporting evidence"
             echo "$(checkmark "$CORRECTIVE") Corrective action"
