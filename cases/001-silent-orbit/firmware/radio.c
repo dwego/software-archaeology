@@ -1,29 +1,29 @@
 #include "radio.h"
 
-static uint32_t current_frequency_khz;
+static float current_frequency_mhz;
 static uint16_t frequency_register;
 
-static uint16_t frequency_to_register(uint32_t frequency_khz)
+void radio_set_frequency(float frequency_mhz)
 {
-    return (uint16_t)(frequency_khz / 10U);
-}
-
-void radio_set_frequency(uint32_t frequency_khz)
-{
-    current_frequency_khz = frequency_khz;
+    current_frequency_mhz = frequency_mhz;
 
     /*
-     * Hardware stores the carrier frequency in 10 kHz units.
-     * Keep this conversion inside the driver.
-     *
-     * RHC — 1968-08-19
+     * Revision C allows higher-level flight software to provide MHz.
+     * Convert to kHz before writing the device configuration.
      */
-    frequency_register = frequency_to_register(frequency_khz);
+    uint32_t frequency_khz =
+        (uint32_t)(frequency_mhz * 1000.0f);
+
+    /*
+     * Hardware interface cleanup.
+     * The driver now writes the converted value directly.
+     */
+    frequency_register = (uint16_t)frequency_khz;
 }
 
-uint32_t radio_get_frequency(void)
+float radio_get_frequency(void)
 {
-    return current_frequency_khz;
+    return current_frequency_mhz;
 }
 
 uint16_t radio_get_register_value(void)

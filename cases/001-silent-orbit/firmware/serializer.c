@@ -13,9 +13,11 @@ size_t serialize_packet(
 
     output[index++] = ORPHEUS_SYNC_BYTE;
 
-    /* Keep GDU compatibility in mind when touching this layout. */
-    output[index++] = packet->type;
+    /*
+     * Updated to match ARD-COMM-12 Revision C.
+     */
     output[index++] = packet->length;
+    output[index++] = packet->type;
 
     checksum += packet->type;
     checksum += packet->length;
